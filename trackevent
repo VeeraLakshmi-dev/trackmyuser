@@ -1,0 +1,23 @@
+   public function sendEvent(Request $request)
+    {
+        try {
+            $payload = [
+                "app_token"        => "fd5fa56d-d527-4e8c-b0d5-dd95bca5643b",
+                "s2s_key"          => "FED55594-CCEB-48A0-B36C-FFB96A7EAA9C",
+                "user_id"          => $request->user_id,
+                "event_code"       => $request->event_code,
+                "revenue_currency" => $request->revenue_currency ?? "INR",
+                "revenue_value"    => $request->revenue_value ?? 0
+            ];
+    
+            $client = new \GuzzleHttp\Client();
+            $response = $client->post('https://api.trackmyuser.com/v1/measurement/event/s2s/create', [
+                'json' => $payload
+            ]);
+    
+            return json_decode($response->getBody(), true);
+    
+        } catch (\Exception $e) {
+            return ['error' => $e->getMessage()];
+        }
+    }
