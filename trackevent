@@ -1,4 +1,43 @@
-   public function sendEvent(Request $request)
+ public function getTrackingLink($campaignId, $publisherId, $userId)
+    {
+        $apiKey = "675c1ad42f98baba43c39c0f99b675c1ad42f9b6";
+
+        $url = "https://api.trackier.com/v2/trackingLink/$campaignId/$publisherId?apiKey=$apiKey";
+
+        try {
+            $client = new Client();
+            $response = $client->get($url);
+
+            $responseData = json_decode($response->getBody(), true);
+
+            if (isset($responseData['success']) && $responseData['success']) {
+                // Append userId
+                $finalUrl = $responseData['url'] . "&p2=" . $userId;
+
+                return response()->json([
+                    'success'     => true,
+                    'campaignId'  => $campaignId,
+                    'publisherId' => $publisherId,
+                    'userId'      => $userId,
+                    'url'         => $finalUrl,
+                    'shortLink'   => $responseData['shortLink'] ?? null
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error generating link',
+                'trackier_response' => $responseData
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+    
+    public function sendEvent(Request $request)
     {
         try {
             $payload = [
